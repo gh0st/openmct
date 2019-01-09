@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -31,22 +31,45 @@ define(
                 mockSelection,
                 mockDomainObject,
                 mockMutationCapability,
+                mockCompositionCapability,
+                mockCompositionObjects,
+                mockComposition,
                 mockUnlisten,
                 selectable = [],
                 controller;
 
+            function mockPromise(value) {
+                return {
+                    then: function (thenFunc) {
+                        return mockPromise(thenFunc(value));
+                    }
+                };
+            }
+
+            function createDomainObject() {
+                return {
+                    useCapability: function () {
+                        return mockCompositionCapability;
+                    }
+                };
+            }
+
             beforeEach(function () {
+                mockComposition = ["a", "b"];
+                mockCompositionObjects = mockComposition.map(createDomainObject);
+                mockCompositionCapability = mockPromise(mockCompositionObjects);
+
                 mockUnlisten = jasmine.createSpy('unlisten');
                 mockMutationCapability = jasmine.createSpyObj("mutationCapability", [
                     "listen"
                 ]);
-                mockMutationCapability.listen.andReturn(mockUnlisten);
+                mockMutationCapability.listen.and.returnValue(mockUnlisten);
                 mockDomainObject = jasmine.createSpyObj("domainObject", [
                     "getCapability",
                     "useCapability"
                 ]);
-                mockDomainObject.useCapability.andCallThrough();
-                mockDomainObject.getCapability.andReturn(mockMutationCapability);
+                mockDomainObject.useCapability.and.returnValue(mockCompositionCapability);
+                mockDomainObject.getCapability.and.returnValue(mockMutationCapability);
 
                 mockScope = jasmine.createSpyObj("$scope", ['$on']);
                 mockSelection = jasmine.createSpyObj("selection", [
@@ -54,7 +77,7 @@ define(
                     'off',
                     'get'
                 ]);
-                mockSelection.get.andReturn([]);
+                mockSelection.get.and.returnValue([]);
                 mockOpenMCT = {
                     selection: mockSelection
                 };
@@ -65,7 +88,7 @@ define(
                     }
                 };
 
-                spyOn(ElementsController.prototype, 'refreshComposition');
+                spyOn(ElementsController.prototype, 'refreshComposition').and.callThrough();
 
                 controller = new ElementsController(mockScope, mockOpenMCT);
             });
@@ -100,29 +123,29 @@ define(
             });
 
             it("refreshes composition on selection", function () {
-                mockOpenMCT.selection.on.mostRecentCall.args[1](selectable);
+                mockOpenMCT.selection.on.calls.mostRecent().args[1](selectable);
 
                 expect(ElementsController.prototype.refreshComposition).toHaveBeenCalledWith(mockDomainObject);
             });
 
             it("listens on mutation and refreshes composition", function () {
-                mockOpenMCT.selection.on.mostRecentCall.args[1](selectable);
+                mockOpenMCT.selection.on.calls.mostRecent().args[1](selectable);
 
                 expect(mockDomainObject.getCapability).toHaveBeenCalledWith('mutation');
                 expect(mockMutationCapability.listen).toHaveBeenCalled();
-                expect(ElementsController.prototype.refreshComposition.calls.length).toBe(1);
+                expect(ElementsController.prototype.refreshComposition.calls.count()).toBe(1);
 
-                mockMutationCapability.listen.mostRecentCall.args[0](mockDomainObject);
+                mockMutationCapability.listen.calls.mostRecent().args[0](mockDomainObject);
 
-                expect(ElementsController.prototype.refreshComposition.calls.length).toBe(2);
+                expect(ElementsController.prototype.refreshComposition.calls.count()).toBe(2);
             });
 
             it("cleans up mutation listener when selection changes", function () {
-                mockOpenMCT.selection.on.mostRecentCall.args[1](selectable);
+                mockOpenMCT.selection.on.calls.mostRecent().args[1](selectable);
 
                 expect(mockMutationCapability.listen).toHaveBeenCalled();
 
-                mockOpenMCT.selection.on.mostRecentCall.args[1](selectable);
+                mockOpenMCT.selection.on.calls.mostRecent().args[1](selectable);
 
                 expect(mockUnlisten).toHaveBeenCalled();
             });
@@ -133,9 +156,28 @@ define(
                         elementProxy: {}
                     }
                 };
-                mockOpenMCT.selection.on.mostRecentCall.args[1](selectable);
+                mockOpenMCT.selection.on.calls.mostRecent().args[1](selectable);
 
                 expect(mockDomainObject.getCapability).not.toHaveBeenCalledWith('mutation');
+            });
+
+            it("checks concurrent changes to composition", function () {
+                var secondMockComposition = ["a", "b", "c"],
+                    secondMockCompositionObjects = secondMockComposition.map(createDomainObject),
+                    firstCompositionCallback,
+                    secondCompositionCallback;
+
+                spyOn(mockCompositionCapability, "then").and.callThrough();
+
+                controller.refreshComposition(mockDomainObject);
+                controller.refreshComposition(mockDomainObject);
+
+                firstCompositionCallback = mockCompositionCapability.then.calls.all()[0].args[0];
+                secondCompositionCallback = mockCompositionCapability.then.calls.all()[1].args[0];
+                secondCompositionCallback(secondMockCompositionObjects);
+                firstCompositionCallback(mockCompositionObjects);
+
+                expect(mockScope.composition).toBe(secondMockCompositionObjects);
             });
         });
     }

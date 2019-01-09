@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -23,9 +23,16 @@
 ul.tree {
     @include menuUlReset();
     @include user-select(none);
-    li {
+    > li {
         display: block;
+        align-content: flex-end;
         position: relative;
+        .grippy-sm {
+            font-size: 12px;
+            margin-right: $interiorMargin;
+            opacity: 0.5;
+            width: 1em;
+        }
     }
     ul.tree {
         margin-left: $treeVCW + $interiorMargin;
@@ -53,12 +60,10 @@ ul.tree {
     .view-control {
         color: $colorItemTreeVC;
         margin-right: $interiorMargin;
-        height: 100%;
-        line-height: inherit;
         width: $treeVCW;
-        &:before { display: none; }
-        &.has-children {
-            &:before { display: block; }
+        &:before { display: block; }
+        &.no-children {
+            &:before { display: none; }
         }
     }
 
@@ -119,6 +124,17 @@ body.desktop {
                     color: $colorItemTreeIconHover;
                 }
             }
+        }
+    }
+}
+
+ul.tree.reordering {
+    // User is drag reordering a tree item in a container that allows the action
+    .tree-item:not(.reorder-actor):hover {
+        background: rgba($colorKey, 0.2);
+        border: 1px dashed rgba($colorKey, 1);
+        > * {
+            opacity: 0.25;
         }
     }
 }

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Open MCT, Copyright (c) 2014-2017, United States Government
+ * Open MCT, Copyright (c) 2014-2018, United States Government
  * as represented by the Administrator of the National Aeronautics and Space
  * Administration. All rights reserved.
  *
@@ -24,8 +24,6 @@ define([
     'legacyRegistry',
 
     '../src/adapter/bundle',
-    '../src/api/objects/bundle',
-    '../src/api/telemetry/bundle',
 
     '../example/builtins/bundle',
     '../example/composite/bundle',
@@ -38,7 +36,6 @@ define([
     '../example/msl/bundle',
     '../example/notifications/bundle',
     '../example/persistence/bundle',
-    '../example/plotOptions/bundle',
     '../example/policy/bundle',
     '../example/profiling/bundle',
     '../example/scratchpad/bundle',
@@ -73,7 +70,6 @@ define([
     '../platform/features/my-items/bundle',
     '../platform/features/pages/bundle',
     '../platform/features/hyperlink/bundle',
-    '../platform/features/plot/bundle',
     '../platform/features/static-markup/bundle',
     '../platform/features/table/bundle',
     '../platform/features/timeline/bundle',
@@ -95,8 +91,6 @@ define([
 
     var DEFAULTS = [
         'src/adapter',
-        'src/api/objects',
-        'src/api/telemetry',
         'platform/framework',
         'platform/core',
         'platform/representation',
@@ -120,7 +114,6 @@ define([
         'platform/features/listview',
         'platform/features/pages',
         'platform/features/hyperlink',
-        'platform/features/plot',
         'platform/features/timeline',
         'platform/features/table',
         'platform/forms',

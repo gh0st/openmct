@@ -37,14 +37,16 @@ module.exports = function(config) {
             {pattern: 'bower_components/**/*.js', included: false},
             {pattern: 'node_modules/d3-*/**/*.js', included: false},
             {pattern: 'node_modules/vue/**/*.js', included: false},
-            {pattern: 'src/**/*.js', included: false},
+            {pattern: 'node_modules/printj/dist/*.js', included: false},
+            {pattern: 'src/**/*', included: false},
+            {pattern: 'node_modules/painterro/build/*.js', included: false},
+            {pattern: 'node_modules/html2canvas/dist/*', included: false},
             {pattern: 'example/**/*.html', included: false},
             {pattern: 'example/**/*.js', included: false},
             {pattern: 'example/**/*.json', included: false},
             {pattern: 'platform/**/*.js', included: false},
             {pattern: 'warp/**/*.js', included: false},
             {pattern: 'platform/**/*.html', included: false},
-            {pattern: 'src/**/*.html', included: false},
             'test-main.js'
         ],
 
@@ -63,7 +65,7 @@ module.exports = function(config) {
         // Test results reporter to use
         // Possible values: 'dots', 'progress'
         // Available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['progress', 'coverage', 'html', 'junit'],
+        reporters: ['progress', 'coverage', 'html'],
 
         // Web server port.
         port: 9876,
@@ -79,7 +81,7 @@ module.exports = function(config) {
         // Specify browsers to run tests in.
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: [
-            'Chrome'
+            'ChromeHeadless'
         ],
 
         // Code coverage reporting.
@@ -89,7 +91,8 @@ module.exports = function(config) {
                 "dist/reports/coverage",
             check: {
                 global: {
-                    lines: 80
+                    lines: 80,
+                    excludes: ['src/plugins/plot/**/*.js']
                 }
             }
         },
@@ -99,10 +102,6 @@ module.exports = function(config) {
             outputDir: "dist/reports/tests",
             preserveDescribeNesting: true,
             foldAll: false
-        },
-
-        junitReporter: {
-            outputDir: process.env.CIRCLE_TEST_REPORTS || 'dist/reports/junit'
         },
 
         // Continuous Integration mode.
